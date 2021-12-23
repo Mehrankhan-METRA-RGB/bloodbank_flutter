@@ -6,20 +6,21 @@ class App {
   static final instance = App._private();
 
   ///Application SnackBar
-  SnackBar snackBar(BuildContext context,
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar(BuildContext context,
           {String? text, Color? bgColor, TextStyle? textStyle}) =>
-      SnackBar(
+      Scaffold.of(context).showSnackBar( SnackBar(
         content: Text(
-          text!,
-          style: textStyle ?? Theme.of(context).snackBarTheme.contentTextStyle,
+            text!,
+            style: textStyle ?? Theme.of(context).snackBarTheme.contentTextStyle,
         ),
         margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
         duration: const Duration(seconds: 2),
+
         backgroundColor:
             bgColor ?? Theme.of(context).snackBarTheme.backgroundColor,
-        behavior: Theme.of(context).snackBarTheme.behavior,
+        behavior: SnackBarBehavior.floating,
         shape: Theme.of(context).snackBarTheme.shape,
-      );
+      ));
 
 
 ///Application Button

@@ -11,8 +11,15 @@ void login()async {
   googleAccount.value=await _googleSignIn.signIn();
 }
   void logout()async {
-    googleAccount.value=await _googleSignIn.signOut();
+  await _googleSignIn.signOut();
   }
+Future<bool?> isSignedIn()async{
+ return await _googleSignIn.isSignedIn() ;
+}
+
+void signInOptions()async {
+  googleAccount.value=( _googleSignIn.signInOption) as GoogleSignInAccount?;
+}
 
 }
 

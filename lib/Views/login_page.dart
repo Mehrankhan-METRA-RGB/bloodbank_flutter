@@ -1,24 +1,37 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../Controllers/auth/auth_controller.dart';
+import '../Controllers/contants/values.dart';
 import '../models/user_model.dart';
 import 'constants/text_field.dart';
 import 'constants/widgets.dart';
+import 'dashboard.dart';
 
 class Login extends StatelessWidget {
   Login({Key? key}) : super(key: key);
   final AuthController signCont = Get.put(AuthController());
+  CollectionReference userRef = FirebaseFirestore.instance.collection(userDoc);
+  final signGoogle = GoogleSignIn();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: [App.instance.button(context, child:const Text("logout"), onPressed: (){signCont.logout();})],),
+      appBar: AppBar(
+        actions: const [],
+      ),
       body: Center(
         child: Obx(() {
+
           if (signCont.googleAccount.value == null) {
             return signInButton();
           } else {
-            return const ProceedSignUp();
+            return ProceedSignUp(
+              authData: signCont,
+
+
+            );
           }
         }),
       ),
@@ -54,7 +67,7 @@ class ProceedSignUp extends StatefulWidget {
 class _ProceedSignUpState extends State<ProceedSignUp> {
   /// local variable fields
   final CollectionReference userReference =
-      FirebaseFirestore.instance.collection('users');
+      FirebaseFirestore.instance.collection(userDoc);
 
   final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
 
@@ -69,10 +82,15 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
   final TextEditingController _controllerBloodGroup = TextEditingController();
 
   final TextEditingController _controllerPrice = TextEditingController();
+  Future<DocumentSnapshot<Map<String, dynamic>>>? loadedData;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    ///get the old users data
+    loadedData=userReference.doc(widget.authData!.googleAccount.value!.id).get() as Future<DocumentSnapshot<Map<String, dynamic>>>?;
+
     _controllerBio.addListener(() {
       setState(() {});
     });
@@ -95,70 +113,109 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _userFormKey,
-      child: formColumn(context),
-    );
+    return SingleChildScrollView(child: formColumn(context));
   }
 
   Widget formColumn(BuildContext context) {
-    return ListView(
-      children: [
-        AppTextField(
-          controller: _controllerCountry,
-          hint: "Country",
-        ),
-        AppTextField(
-          controller: _controllerCity,
-          hint: "City",
-        ),
-        AppTextField(
-          controller: _controllerBio,
-          hint: "Bio",
-          lines: 5,
-        ),
-        AppTextField(
-          controller: _controllerPrice,
-          hint: "Price",
-        ),
-        AppTextField(
-          controller: _controllerBloodGroup,
-          hint: "Blood Group",
-        ),
-        AppTextField(
-          controller: _controllerType,
-          hint: "Type",
-        ),
-        App.instance.button(context, child: const Text("Proceed"),
-            onPressed: () {
-          if (_userFormKey.currentState!.validate()) {
-            App.instance.snackBar(context, text: "uploading data");
-          }
-        })
-      ],
+    return FutureBuilder<DocumentSnapshot>(
+    future: userReference.doc(widget.authData!.googleAccount.value!.id).get(),
+      builder: (context, snapshot) {
+      if(snapshot.hasData){
+        ///after Successful login
+        ///app will load users data if exists
+        ///and assign it to TextFields
+        if(snapshot.data!.data()!=null){
+          Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+          UserModel current=UserModel.fromMap(data);
+          _controllerBloodGroup.text=current.group!;
+          _controllerType.text=current.type!;
+          _controllerPrice.text=current.rate!;
+          _controllerBio.text=current.bio!;
+          _controllerCity.text=current.city!;
+          _controllerCountry.text=current.country!;
+        }
+
+      }
+
+        return Form(
+            key: _userFormKey,
+            child: Column(
+              children: [
+                AppTextField(
+                  controller: _controllerCountry,
+                  inputType: TextInputType.name,
+                  hint: "Country",
+                ),
+                AppTextField(
+                  controller: _controllerCity,
+                  inputType: TextInputType.name,
+                  hint: "City",
+                ),
+                AppTextField(
+                  controller: _controllerPrice,
+                  inputType: TextInputType.name,
+                  hint: "Price",
+                ),
+                AppTextField(
+                  controller: _controllerBloodGroup,
+                  inputType: TextInputType.name,
+                  hint: "Blood Group",
+                ),
+                AppTextField(
+                  controller: _controllerType,
+                  inputType: TextInputType.name,
+                  hint: "Type",
+                ),
+                AppTextField(
+                  controller: _controllerBio,
+                  hint: "Bio",
+                  inputType: TextInputType.multiline,
+                  expand: true,
+                ),
+                const SizedBox(
+                  height: 50,
+                ),
+                App.instance.button(context, child: const Text("Proceed"),
+                    onPressed: () async {
+                  if (_userFormKey.currentState!.validate()) {
+                    UserModel userData = UserModel(
+                        id: widget.authData!.googleAccount.value!.id,
+                        name: widget.authData!.googleAccount.value!.displayName,
+                        country: _controllerCountry.text,
+                        city: _controllerCity.text,
+                        bio: _controllerBio.text,
+                        rate: _controllerPrice.text,
+                        type: _controllerType.text,
+                        group: _controllerBloodGroup.text);
+                    App.instance.snackBar(context, text: "Loading....");
+
+                    await addUser(context, userModel: userData)
+                        .then((value) => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Dashboard(
+                                      authData:
+                                          widget.authData!.googleAccount.value!,
+                                    ))));
+                  } else {
+                    App.instance.snackBar(context,
+                        text: "Something is Wrong", bgColor: Colors.red);
+                  }
+                })
+              ],
+            ));
+      }
     );
   }
 
   Future<void> addUser(BuildContext context, {UserModel? userModel}) {
     return userReference
-        .doc(userModel!.id.toString())
-        .set(userModel.toJson())
+        .doc(userModel!.id)
+        .set(userModel.toMap())
         .then((value) => App.instance.snackBar(context, text: "User Added"))
         .catchError((error) => App.instance.snackBar(context,
             text: "Failed to add user: $error", bgColor: Colors.redAccent));
   }
-
-  ///Cloud Firestore supports storing and manipulating
-  /// values on your database, such as Timestamps, GeoPoints,
-  /// Blobs and array management.
-  Future<void> updateUserGeo() {
-    return userReference
-        .doc('ABC123')
-        .update({'info.address.location': const GeoPoint(53.483959, -2.244644)})
-        .then((value) => print("User Updated"))
-        .catchError((error) => print("Failed to update user: $error"));
-  }
-
 
 
   ///Sometimes you may wish to update a document, rather than replacing all

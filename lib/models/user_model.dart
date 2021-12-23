@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   UserModel({
     this.id,
@@ -10,9 +12,11 @@ class UserModel {
     this.group,
     this.type,
     this.rate,
+    this.geo,
+    this.timestamp,
   });
 
-  final int? id;
+  final String? id;
   final String? bio;
   final String? name;
   final String? country;
@@ -20,6 +24,8 @@ class UserModel {
   final String? group;
   final String? type;
   final String? rate;
+  final GeoPoint? geo;
+  final Timestamp? timestamp;
 
   factory UserModel.fromJson(String str) => UserModel.fromMap(json.decode(str));
 
@@ -34,6 +40,8 @@ class UserModel {
     group: json["group"],
     type: json["type"],
     rate: json["rate"],
+    geo: json["geo"],
+    timestamp: json["timestamp"],
   );
 
   Map<String, dynamic> toMap() => {
@@ -45,5 +53,7 @@ class UserModel {
     "group": group,
     "type": type,
     "rate": rate,
+    "geo": geo,
+    "timestamp": timestamp,
   };
 }
