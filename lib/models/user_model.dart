@@ -11,9 +11,18 @@ class UserModel {
     this.city,
     this.group,
     this.type,
-    this.rate,
+    this.price,
     this.geo,
     this.timestamp,
+    this.isAvailableForDonation,
+    this.lastTimeDonated,
+    this.nextDonation,
+    this.rating,
+    this.totalDonations,
+    this.url,
+    this.phone,
+    this.email,
+
   });
 
   final String? id;
@@ -23,9 +32,17 @@ class UserModel {
   final String? city;
   final String? group;
   final String? type;
-  final String? rate;
-  final GeoPoint? geo;
+  final String? price;
+  final String? url;
+  final String? phone;
+  final String? email;
+  final Timestamp? lastTimeDonated;
+  final Timestamp? nextDonation;
+  final bool? isAvailableForDonation;
+  final double? rating;
+  final List? geo;
   final Timestamp? timestamp;
+  final int? totalDonations;
 
   factory UserModel.fromJson(String str) => UserModel.fromMap(json.decode(str));
 
@@ -39,9 +56,18 @@ class UserModel {
     city: json["city"],
     group: json["group"],
     type: json["type"],
-    rate: json["rate"],
+    price: json["price"],
     geo: json["geo"],
     timestamp: json["timestamp"],
+    isAvailableForDonation: json["isAvailableForDonation"],
+    rating: json["rating"],
+    nextDonation: json["nextDonation"],
+    lastTimeDonated: json["lastTimeDonated"],
+    totalDonations:json["totalDonations"],
+    url:json["url"],
+    phone:json["phone"],
+    email:json["email"],
+
   );
 
   Map<String, dynamic> toMap() => {
@@ -52,8 +78,17 @@ class UserModel {
     "city": city,
     "group": group,
     "type": type,
-    "rate": rate,
+    "price": price,
     "geo": geo,
     "timestamp": timestamp,
+    "isAvailableForDonation": isAvailableForDonation,
+    "rating": rating,
+    "nextDonation": nextDonation,
+    "lastTimeDonated": lastTimeDonated,
+    "totalDonations": totalDonations,
+    "url": url,
+    "phone": phone,
+    "email": email,
+
   };
 }

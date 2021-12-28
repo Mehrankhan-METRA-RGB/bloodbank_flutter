@@ -18,7 +18,7 @@ class AppTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 22.0, horizontal: 10),
       child: ConstrainedBox(
         constraints: const BoxConstraints(
           maxHeight: 200.0,
@@ -32,6 +32,7 @@ class AppTextField extends StatelessWidget {
           textAlignVertical: TextAlignVertical.top,
           keyboardType: inputType,
           decoration: _inputDecoration(context),
+          toolbarOptions:const ToolbarOptions(paste: true, cut: true, selectAll: true, copy: true),
           onFieldSubmitted: (value) {
             //Validator
           },
