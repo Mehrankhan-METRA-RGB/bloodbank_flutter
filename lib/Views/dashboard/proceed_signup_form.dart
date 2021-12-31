@@ -20,8 +20,8 @@ import 'dashboard.dart';
 import 'map/map_show.dart';
 
 class ProceedSignUp extends StatefulWidget {
-  const ProceedSignUp({this.currentUser, Key? key}) : super(key: key);
-
+  const ProceedSignUp({this.currentUser,this.oldData, Key? key}) : super(key: key);
+final UserModel? oldData;
   ///Constructor fields
   final GoogleSignInAccount? currentUser;
 
@@ -52,21 +52,23 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
 
   Future<DocumentSnapshot<Map<String, dynamic>>>? loadedData;
   // LatLng? _geo;
-
+String? fullPhoneNumber;
   MarkerId idPlace = const MarkerId("pickPlace");
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (widget.currentUser != null) {
-      ///get the old users data
-      initialData(widget.currentUser!.id);
-    } else {
-      Credentials credentials =
-      Credentials.fromJson(Hive.box(authBox).get(authBoxCredentialsKey));
 
-      initialData(credentials.id);
-    }
+    initialData(widget.oldData);
+    // if (widget.currentUser != null) {
+    //   ///get the old users data
+    //   initialData(widget.currentUser!.id);
+    // } else {
+    //   Credentials credentials =
+    //   Credentials.fromJson(Hive.box(authBox).get(authBoxCredentialsKey));
+    //
+    //   initialData(credentials.id);
+    // }
 
     _controllerBio.addListener(() {
       setState(() {});
@@ -98,7 +100,7 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
     _controllerGeo.addListener(() {
       setState(() {});
     });
-    initialData(widget.currentUser!.id);
+
   }
 
   @override
@@ -114,12 +116,16 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
         child: Column(
           children: [
             // App.instance.button(context, child: const Text('Test'), onPressed: (){initialData();}),
-            MapShow(
-              width: MediaQuery.of(context).size.width - 4,
-              height: 200,
+           MapShow(
+                paddingTop: 20,
+                width: MediaQuery.of(context).size.width - 4,
+                height: 200,
+
+
             ),
             Obx(() {
               if(!_geoController.placeByGeo.isBlank!){
+
                 _controllerCity.text=_geoController.placeByGeo.value[2]!;
               }
 
@@ -151,7 +157,9 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
                   ),
                 ),
                 onChanged: (phone) {
+                  // _controllerPhone.text=phone.completeNumber;
                   // print(countries.contains(phone.countryCode));
+                  fullPhoneNumber=phone.completeNumber;
                   for (var country in countries) {
                     phone.countryCode == "+${country["dial_code"]}"
                         ? _controllerCountry.text = country["name"]
@@ -216,25 +224,24 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
   ///TODO: Business Logic
 
 
-  Future initialData(String? userDocumentId) async {
-    await FirebaseFirestore.instance
-        .collection(userDoc)
-        .doc(userDocumentId!)
-        .get()
-        .then((DocumentSnapshot snap) {
-      if (snap.exists) {
-        UserModel user = UserModel.fromJson(jsonEncode(snap.data()));
-        _bloodController.val(user.group!);
-        _typeController.val(user.type!);
-        _controllerPrice.text = user.price!;
-        _controllerBio.text = user.bio!;
-        _controllerCity.text = user.city!;
-        _controllerCountry.text = user.country!;
-        _controllerPhone.text = user.phone!;
-        _geoController.insertGeo(GeoPoint(user.geo![0], user.geo![1]));
-        _geoController.getPlace(GeoPoint(user.geo![0], user.geo![1]));
-      } else {}
-    });
+   initialData(UserModel? user)  {
+     if (user!=null) {
+       _geoController.insertGeo(GeoPoint(user.geo![0], user.geo![1]));
+       _geoController.getPlace(GeoPoint(user.geo![0], user.geo![1]));
+       _bloodController.val(user.group!);
+       _typeController.val(user.type!);
+       _controllerPrice.text = user.price!;
+       _controllerBio.text = user.bio!;
+       _controllerCity.text = user.city!;
+       _controllerEmail.text = user.email!;
+       _controllerCountry.text = user.country!;
+       _controllerPhone.text = user.phone??'';
+
+     } else {
+
+
+
+     }
   }
 
   ///Upload or update users data
@@ -267,7 +274,7 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
           type: _typeController.choiceData.value,
           group: _bloodController.choiceData.value,
           url: widget.currentUser!.photoUrl,
-          phone: _controllerPhone.text,
+          phone: fullPhoneNumber,
           email: _controllerEmail.text);
 
       await App.instance
@@ -279,11 +286,7 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
       }).whenComplete(() => Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => Dashboard(
-                geo: LatLng( _geoController.geo.value!.latitude,
-                    _geoController.geo.value!.longitude),
-                authData: Credentials.fromJson(
-                    Hive.box(authBox).get(authBoxCredentialsKey)),
+              builder: (context) => Dashboard(user: userData,
               ))));
     } else {
       App.instance

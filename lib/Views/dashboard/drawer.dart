@@ -11,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 
 import '../../Controllers/auth/auth_controller.dart';
+import '../blood_board.dart';
 import '../constants/small_tiles.dart';
 import '../login_page.dart';
 
@@ -210,7 +211,11 @@ padding:const EdgeInsets.only(right: 15,left: 15,top:5,bottom: 20),
 
   }
   edit(){
-    AuthController authController=Get.put(AuthController());
-    Navigator.push(context, MaterialPageRoute(builder: (context){return  UpdateProfile(currentUser:localData,);}));
+    // AuthController authController=Get.put(AuthController());
+
+    Navigator.push(context, MaterialPageRoute(builder: (context){return
+      UpdateProfile(currentUser:localData,);
+
+    }));
   }
 }

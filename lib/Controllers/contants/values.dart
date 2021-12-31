@@ -30,7 +30,7 @@ const Map<String, dynamic> bloodMap = {
   },
   "AB+": {
     "donateTo": ["AB+"],
-    "receiveFrom": ["A+", "A-", "O+", "O-"]
+    "receiveFrom": ["A+", "O+", "B+", "AB+", "A-", "O-", "B-", "AB-"]
   },
   "A-": {
     "donateTo": ["A+", "AB+", "A-", "AB-"],

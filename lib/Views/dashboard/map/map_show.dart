@@ -1,17 +1,21 @@
+import 'package:bloodbank/Controllers/contants/values.dart';
+import 'package:bloodbank/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hive/hive.dart';
 
 import '../../../Controllers/geo_controller.dart';
 
 class MapShow extends StatelessWidget {
-   MapShow({required this.width,this.paddingTop=80,required this.height,Key? key}) : super(key: key);
+   MapShow({required this.width,this.initPos,this.paddingTop=80,required this.height,Key? key}) : super(key: key);
    final double? width;
    final double? height;
    final double? paddingTop;
+   final LatLng? initPos;
 
 
 
@@ -24,9 +28,10 @@ class MapShow extends StatelessWidget {
       height: height,
       width: width,
       child:Obx((){
-        double? lat=_geoController.geo.value?.latitude??33.0987394;
-        double? long=_geoController.geo.value?.longitude??71.083432;
-        _geoController.insertGeo(GeoPoint(lat,long));
+
+        double? lat=_geoController.geo.value?.latitude?? UserModel.fromJson(Hive.box(authBox).get(authBoxDataKey)).geo?[0]??33.65756 ;
+        double? long=_geoController.geo.value?.longitude??UserModel.fromJson(Hive.box(authBox).get(authBoxDataKey)).geo?[1]??71.083432;
+        _geoController.insertGeo(GeoPoint(lat!,long!));
         return GoogleMap(
             mapType: MapType.normal,
             onMapCreated: (controller) {
@@ -43,14 +48,19 @@ compassEnabled: true,
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
 
-            initialCameraPosition: CameraPosition(target: LatLng(lat,long), zoom: 14),
+            initialCameraPosition: CameraPosition(target:initPos?? LatLng(lat,long), zoom: 10),
             onTap: (geo) {
               if (kDebugMode) {
                 print("Latitude: ${geo.latitude}");
                 print("Latitude: ${geo.longitude}");
               }
               _geoController.insertGeo(GeoPoint(geo.latitude,geo.longitude));
-              _geoController.getPlace(_geoController.geo.value!);
+              // geoController.getPlace(GeoPoint(geoController.geo.value!.latitude, geoController.geo.value!.longitude));
+              _geoController.getPlace(GeoPoint(geo.latitude, geo.longitude));
+              if (kDebugMode) {
+                print(_geoController.placeByGeo.value);
+
+              }
             },
             markers: <Marker>{
               Marker(

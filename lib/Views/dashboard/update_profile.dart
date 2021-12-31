@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:bloodbank/Controllers/coice_controller.dart';
 import 'package:bloodbank/Controllers/geo_controller.dart';
+import 'package:bloodbank/models/phone_number_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +102,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     });
     initialData(widget.currentUser!.id);
   }
-
+String? fullPhoneNo;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,10 +117,12 @@ class _UpdateProfileState extends State<UpdateProfile> {
           children: [
             // App.instance.button(context, child: const Text('Test'), onPressed: (){initialData();}),
             MapShow(
+              paddingTop: 20,
               width: MediaQuery.of(context).size.width - 4,
               height: 200,
             ),
             Obx(() {
+              _controllerCity.text=(!_geoController.placeByGeo.value.isBlank!?_geoController.placeByGeo.value[2]:' ')!;
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
@@ -149,6 +152,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 ),
                 onChanged: (phone) {
                   // print(countries.contains(phone.countryCode));
+                  // _controllerPhone.text=phone.completeNumber;
+                  fullPhoneNo=phone.completeNumber;
                   for (var country in countries) {
                     phone.countryCode == "+${country["dial_code"]}"
                         ? _controllerCountry.text = country["name"]
@@ -156,6 +161,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   }
                 },
                 onCountryChanged: (phone) {
+
                   for (var country in countries) {
                     phone.countryCode == "+${country["dial_code"]}"
                         ? _controllerCountry.text = country["name"]
@@ -163,6 +169,11 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   }
                 },
               ),
+            ),
+            AppTextField(
+              controller: _controllerEmail,
+              inputType: TextInputType.emailAddress,
+              hint: "Email",
             ),
             AppTextField(
               controller: _controllerCountry,
@@ -221,7 +232,33 @@ class _UpdateProfileState extends State<UpdateProfile> {
         .get()
         .then((DocumentSnapshot snap) {
       if (snap.exists) {
-        UserModel user = UserModel.fromJson(jsonEncode(snap.data()));
+        UserModel   _user = UserModel.fromJson(jsonEncode(snap.data()));
+
+        List<PhoneModel>  _phone=     countries.map((map) => PhoneModel.fromMap(map)).toList();
+        PhoneModel filteredPhone= _phone.singleWhere((element) => element.name==_user.country);
+        String? newPhone=_user.phone!=null?_user.phone!.replaceAll('+${filteredPhone.dialCode}', ''):_user.phone;
+        UserModel  user=UserModel(
+            id:_user.id,
+            isAvailableForDonation:_user.isAvailableForDonation,
+            totalDonations:_user.totalDonations,
+            name:_user.name,
+            email:_user.email,
+            nextDonation:_user.nextDonation,
+            lastTimeDonated:_user.lastTimeDonated,
+            rating:_user.rating,
+            timestamp:_user.timestamp,
+            phone:newPhone,///Here we have assigned a new without country dial code
+            price:_user.price,
+            geo: _user.geo,
+            group: _user.group,
+            bio: _user.bio,
+            country: _user.country,
+            city: _user.city,
+            url: _user.url,
+            type: _user.type
+
+
+        );
         _bloodController.val(user.group!);
         _typeController.val(user.type!);
         _controllerPrice.text = user.price!;
@@ -229,6 +266,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         _controllerCity.text = user.city!;
         _controllerCountry.text = user.country!;
         _controllerPhone.text = user.phone!;
+        _controllerEmail.text = user.email!;
         _geoController.insertGeo(GeoPoint(user.geo![0], user.geo![1]));
         _geoController.getPlace(GeoPoint(user.geo![0], user.geo![1]));
       } else {}
@@ -260,19 +298,20 @@ class _UpdateProfileState extends State<UpdateProfile> {
           type: _typeController.choiceData.value,
           group: _bloodController.choiceData.value,
           url: widget.currentUser!.photoUrl,
-          phone: _controllerPhone.text,
+          phone: fullPhoneNo,
           email: _controllerEmail.text);
-
-      await App.instance
-          .snackBar(context, text: "Loading....")
-          .whenComplete(() => addUser(context, userModel: userData))
+    // App.instance
+    //     .snakBar( text: "Loading....");
+      await addUser(context, userModel: userData)
           .whenComplete(() {
         Hive.box(authBox).put(authBoxCredentialsKey, data.toJson());
         Hive.box(authBox).put(authBoxDataKey, userData.toJson());
-      });
+      })
+          .whenComplete(() => Navigator.pop(context));
     } else {
       App.instance
-          .snackBar(context, text: "Not Validated", bgColor: Colors.red);
+          .snakBar( text:"Not Validated",bgColor:Colors.red );
+
     }
   }
 

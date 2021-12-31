@@ -6,6 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
+import '../models/map_models.dart';
 import 'contants/values.dart';
 
 class GeoController extends GetxController {

@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:smart_select/smart_select.dart';
 
 class App {
@@ -24,6 +27,26 @@ Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(Bui
       ));
   }
 
+  snakBar({required String? text,String? title, Color? bgColor, TextStyle? textStyle}){
+   Get.snackbar(
+    title??"Application",
+    text!,
+    icon: const Icon(Icons.person, color: Colors.white),
+    snackPosition: SnackPosition.BOTTOM,
+    margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+    duration: const Duration(seconds: 2),
+    isDismissible: true,
+    // dismissDirection: SnackDismissDirection.HORIZONTAL,
+    forwardAnimationCurve: Curves.easeOutBack,
+    backgroundColor:
+    bgColor ?? Get.theme.snackBarTheme.backgroundColor,
+    // snackStyle: sna,
+
+    // shape: Get.theme.snackBarTheme.shape,
+
+  );
+  }
+
 
 ///Application Button
    button(BuildContext context,{
@@ -37,7 +60,7 @@ Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(Bui
       children: [
         child,
       ],
-    ),padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10), onPressed: onPressed,color: color??Theme.of(context).buttonTheme.colorScheme!.background,),
+    ),padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10), onPressed: onPressed,color: color??Colors.redAccent,),
   );
 
 
@@ -53,7 +76,7 @@ Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(Bui
     if (values!.length != titles!.length) {
       throw "The length of values and titles must be same";
     }
-    String? value = controller!.choiceData.value;
+
     List<S2Choice<String>> options = [
       for (var i = 0; i < values.length; i++)
         S2Choice<String>(value: values[i], title: titles[i]),
@@ -64,9 +87,11 @@ Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(Bui
       child: SmartSelect<String>.single(
 placeholder: placeholder,
           title: heading,
-          value: value,
+          value: controller!.choiceData.value,
           choiceItems: options,
-          onChange: (state) => controller.val(state.value),
+          onChange: (state) { controller.val(state.value);
+
+          },
           modalValidation: (val) {
             if (val.isEmpty) {
 

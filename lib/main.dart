@@ -5,13 +5,10 @@ import 'package:bloodbank/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as pathF;
-
 import 'Controllers/contants/values.dart';
-import 'Test/test_1.dart';
 import 'Views/dashboard/dashboard.dart';
 import 'Views/login_page.dart';
 
@@ -60,15 +57,15 @@ class MyApp extends StatelessWidget {
         .fromJson(Hive.box(authBox)
         .get(authBoxCredentialsKey)):Credentials();
   }
-LatLng geo(){
+  UserModel user(){
 
   if(isAlreadyLoggedIn){
     UserModel model=UserModel
         .fromJson(Hive.box(authBox)
         .get(authBoxDataKey));
-    return LatLng(model.geo![0],model.geo![1]);
+    return model;
   }else{
-    return const  LatLng(22.0428,47.2800);
+    return   UserModel();
   }
 
 }
@@ -76,25 +73,36 @@ LatLng geo(){
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Blood Bank',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        buttonBarTheme:ButtonBarThemeData() ,
+        // appBarTheme: AppBarTheme(color: Colors.red,
+        //   elevation: 0,
+        //   backgroundColor: Colors.red,
+        //   iconTheme: const IconThemeData(color: Colors.white,),
+        // toolbarTextStyle:const TextStyle(fontSize: 20,color: Colors.white)
+        // ) ,
+
+        cardColor: Colors.red,
+        accentColor: Colors.redAccent,
+
         primaryColor: Colors.red,
       ),
       home:
       // const DashboardMap()
-      Test1(),
-
+      // Test1(),
+      // Test2(user:user() ,)
        // UpdateProfile(currentUser: _credentials(),)
 
 
 
-      // isAlreadyLoggedIn
-      //     ? Dashboard(
-      //         authData: _credentials(),
-      //   geo: geo(),
-      //       )
-      //     : Login(),
+      isAlreadyLoggedIn
+          ? Dashboard(user:user(),
+
+            )
+          : Login(),
     );
   }
 }

@@ -1,9 +1,15 @@
+import 'dart:convert';
+
+import 'package:bloodbank/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl_phone_field/countries.dart';
+import 'package:intl_phone_field/phone_number.dart';
 import '../Controllers/auth/auth_controller.dart';
 import '../Controllers/contants/values.dart';
+import '../models/phone_number_model.dart';
 import 'dashboard/proceed_signup_form.dart';
 
 class Login extends StatelessWidget {
@@ -15,34 +21,106 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: const [],
+        backgroundColor: Colors.red,
       ),
-      body: Center(
-        child: Obx(() {
-          if (signCont.googleAccount.value == null) {
-            return signInButton();
-          } else {
-            return ProceedSignUp(
-              currentUser: signCont.googleAccount.value,
-            );
-          }
-        }),
-      ),
+      body: Obx(() {
+
+
+        if (signCont.googleAccount.value == null) {
+          return Center(
+            child: FloatingActionButton.extended(
+              onPressed:()=>signInButton(context) ,
+              icon: Image.asset(
+                "assets/icons/google_logo.png",
+                width: 50,
+                height: 50,
+              ),
+              label: const Text("Google SigIn"),
+            ),
+          );
+        } else {
+          return  Center(
+            child: FloatingActionButton.extended(
+              onPressed:()=>signInButton(context) ,
+              icon: Image.asset(
+                "assets/icons/google_logo.png",
+                width: 50,
+                height: 50,
+              ),
+              label: const Text("Google SigIn"),
+            ),
+          );
+        }
+
+
+
+
+      }),
     );
   }
 
-  signInButton() {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        signCont.login();
-      },
-      icon: Image.asset(
-        "assets/icons/google_logo.png",
-        width: 50,
-        height: 50,
-      ),
-      label: const Text("Google SigIn"),
-    );
+  signInButton(BuildContext context) {
+
+    signCont.login().whenComplete(() =>  initialData(signCont.googleAccount.value!.id)
+        .then((old) => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProceedSignUp(
+              currentUser: signCont.googleAccount.value,
+              oldData: old,
+            )))));
+
+
+
+  }
+
+  Future<UserModel?> initialData(String? userDocumentId) async {
+    UserModel? user;
+    await FirebaseFirestore.instance
+        .collection(userDoc)
+        .doc(userDocumentId!)
+        .get()
+        .then((DocumentSnapshot snap) {
+      if (snap.exists) {
+
+        /// Here we break the [UserModel] and created a new [UserModel]
+        /// with a phone number having no [dial_code]
+
+        UserModel   _user = UserModel.fromJson(jsonEncode(snap.data()));
+
+       List<PhoneModel>  _phone=     countries.map((map) => PhoneModel.fromMap(map)).toList();
+        PhoneModel filteredPhone= _phone.singleWhere((element) => element.name==_user.country);
+String? newPhone=_user.phone!=null?_user.phone!.replaceAll('+${filteredPhone.dialCode}', ''):_user.phone;
+user=UserModel(
+  id:_user.id,
+  isAvailableForDonation:_user.isAvailableForDonation,
+  totalDonations:_user.totalDonations,
+  name:_user.name,
+  email:_user.email,
+  nextDonation:_user.nextDonation,
+  lastTimeDonated:_user.lastTimeDonated,
+  rating:_user.rating,
+  timestamp:_user.timestamp,
+  phone:newPhone,///Here we have assigned a new without country dial code
+  price:_user.price,
+  geo: _user.geo,
+  group: _user.group,
+  bio: _user.bio,
+  country: _user.country,
+  city: _user.city,
+  url: _user.url,
+  type: _user.type
+
+
+);
+
+
+
+
+      } else {
+        user = UserModel();
+      }
+    });
+    return user;
   }
 }
-
