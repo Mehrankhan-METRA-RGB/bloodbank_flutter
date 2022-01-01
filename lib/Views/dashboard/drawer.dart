@@ -1,7 +1,9 @@
 import 'package:bloodbank/Controllers/contants/values.dart';
+import 'package:bloodbank/Controllers/phone_controller.dart';
 import 'package:bloodbank/Views/dashboard/proceed_signup_form.dart';
 import 'package:bloodbank/Views/dashboard/update_profile.dart';
 import 'package:bloodbank/models/credentials_model.dart';
+import 'package:bloodbank/models/phone_number_model.dart';
 import 'package:bloodbank/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+import 'package:intl_phone_field/countries.dart';
 
 import '../../Controllers/auth/auth_controller.dart';
 import '../blood_board.dart';
@@ -30,6 +33,8 @@ class _DashboardDrawerState extends State<DashboardDrawer> {
   final AuthController googleController=Get.put(AuthController());
   final CollectionReference reference =
   FirebaseFirestore.instance.collection(userDoc);
+  final PhoneNumberController _phoneNumberController=Get.put(PhoneNumberController());
+
   @override
   void initState() {
     // TODO: implement initState
@@ -55,6 +60,10 @@ if(snap.hasData){
   Map<String, dynamic> data =
   snap.data!.data() as Map<String, dynamic>;
   UserModel user=UserModel.fromMap(data);
+  List<PhoneModel>  _phone=     countries.map((map) => PhoneModel.fromMap(map)).toList();
+  PhoneModel filteredPhone= _phone.singleWhere((element) => element.name==user.country);
+  _phoneNumberController.countryDialCode.value=filteredPhone.dialCode.toString();
+
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -105,7 +114,7 @@ if(snap.hasData){
       Expanded(
         flex: 5,
         child:
-            _profileData(user),
+            _profileData(user,code:'+${filteredPhone.dialCode}'),
 
 
       )
@@ -144,7 +153,7 @@ else{
         ),
       );
 
-  Widget _profileData(UserModel user) {
+  Widget _profileData(UserModel user, {String? code}) {
 
 
     return ListView(
@@ -163,7 +172,7 @@ padding:const EdgeInsets.only(right: 15,left: 15,top:5,bottom: 20),
         ),
         _tile(
           heading:"Phone",
-          value: user.phone,
+          value: '$code ${user.phone}',
         ),
         _tile(
           heading:"Email",

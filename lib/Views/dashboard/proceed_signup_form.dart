@@ -1,5 +1,4 @@
 
-import 'dart:convert';
 
 import 'package:bloodbank/Controllers/coice_controller.dart';
 import 'package:bloodbank/Controllers/geo_controller.dart';
@@ -275,7 +274,7 @@ String? fullPhoneNumber;
           type: _typeController.choiceData.value,
           group: _bloodController.choiceData.value,
           url: widget.currentUser!.photoUrl,
-          phone: fullPhoneNumber,
+          phone: _controllerPhone.text,
           email: _controllerEmail.text);
 
       await App.instance

@@ -145,6 +145,10 @@ final LoadingController loadingController=Get.put(LoadingController());
   }
   Future<List<UserModel?>> _filterSearchList(
       String? yourCity, List<String?> bGroups) async {
+
+    print("Searching for........");
+    print(bGroups);
+    print(yourCity);
     List<UserModel> users = [];
     await FirebaseFirestore.instance
         .collection(userDoc)
@@ -157,9 +161,10 @@ final LoadingController loadingController=Get.put(LoadingController());
           .toList();
       for (QueryDocumentSnapshot<Map<String, dynamic>> element in filtered) {
         users.add(UserModel.fromMap(element.data()));
+        print(element['name']);
       }
     });
-    print(users);
+
     return users;
   }
 

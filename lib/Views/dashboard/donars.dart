@@ -1,5 +1,7 @@
 import 'package:bloodbank/Controllers/contants/values.dart';
+import 'package:bloodbank/models/phone_number_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/countries.dart';
 import 'package:sliverbar_with_card/sliverbar_with_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Controllers/blood_controller.dart';
@@ -39,15 +41,19 @@ class Donors extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
           child: Text(userCity!),
         ),
-        body: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: ListView.builder(
+        body: ListView.builder(
               padding: const EdgeInsets.only(top: 35,bottom: 100),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: users.length,
               itemBuilder: (context, index) {
                 UserModel? snap = users[index];
+
+
+                List<PhoneModel>  _phone=     countries.map((map) => PhoneModel.fromMap(map)).toList();
+                PhoneModel filteredPhone= _phone.singleWhere((element) => element.name==snap?.country);
+                String? code='+${filteredPhone.dialCode}';
+
                 return Card(
                   color: Colors.red,
                   child: ExpansionTile(
@@ -93,14 +99,14 @@ class Donors extends StatelessWidget {
                         ListTile(
                           title: Row(
                             children: [
-                              Text(snap.phone!),
+                              Text('$code${snap.phone}'),
                               const Spacer(),
                               IconButton(
                                 icon: const Icon(
                                   Icons.phone,
                                   color: Colors.white,
                                 ),
-                                onPressed: () => _makeCall(snap.phone),
+                                onPressed: () => _makeCall('$code${snap.phone}'),
                               ),
                             ],
                           ),
@@ -110,11 +116,11 @@ class Donors extends StatelessWidget {
                               Icons.sms,
                               color: Colors.white,
                             ),
-                            onPressed: () => _sendSMS(snap.phone),
+                            onPressed: () => _sendSMS('$code${snap.phone}'),
                           ),
                         ),
                         ListTile(
-                          title: Text(snap.email!),
+                          title: Text(snap.email?? ' '),
                           textColor: Colors.white,
                           trailing: IconButton(
                             icon: const Icon(
@@ -128,7 +134,7 @@ class Donors extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(15.0),
                           child: Center(
-                              child: Text(snap.bio!,
+                              child: Text(snap.bio??' ',
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 12,
@@ -137,7 +143,7 @@ class Donors extends StatelessWidget {
                       ]),
                 );
               }),
-        ),
+
       ),
 
       floatingActionButton: FloatingActionButton(backgroundColor:Colors.deepPurple,

@@ -2,23 +2,20 @@ import 'dart:convert';
 
 import 'package:bloodbank/Controllers/coice_controller.dart';
 import 'package:bloodbank/Controllers/geo_controller.dart';
+import 'package:bloodbank/Controllers/phone_controller.dart';
 import 'package:bloodbank/models/phone_number_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:intl_phone_field/countries.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:smart_select/smart_select.dart' ;
-
 import '../../Controllers/contants/values.dart';
 import '../../models/credentials_model.dart';
 import '../../models/user_model.dart';
 import '../constants/text_field.dart';
 import '../constants/widgets.dart';
-import 'dashboard.dart';
 import 'map/map_show.dart';
 
 class UpdateProfile extends StatefulWidget {
@@ -33,7 +30,7 @@ class UpdateProfile extends StatefulWidget {
 
 class _UpdateProfileState extends State<UpdateProfile> {
   /// local variable fields
-
+final PhoneNumberController _phoneNumberController=Get.put(PhoneNumberController());
   final CollectionReference userReference =
       FirebaseFirestore.instance.collection(userDoc);
   final ChoiceBloodController _bloodController=Get.put(ChoiceBloodController());
@@ -153,7 +150,8 @@ String? fullPhoneNo;
                 onChanged: (phone) {
                   // print(countries.contains(phone.countryCode));
                   // _controllerPhone.text=phone.completeNumber;
-                  fullPhoneNo=phone.completeNumber;
+                  // fullPhoneNo=phone.completeNumber;
+                  _phoneNumberController.insertPhone(phone.completeNumber);
                   for (var country in countries) {
                     phone.countryCode == "+${country["dial_code"]}"
                         ? _controllerCountry.text = country["name"]
@@ -161,11 +159,14 @@ String? fullPhoneNo;
                   }
                 },
                 onCountryChanged: (phone) {
-
+                  _phoneNumberController.countryDialCode.value=phone.countryCode!;
                   for (var country in countries) {
-                    phone.countryCode == "+${country["dial_code"]}"
-                        ? _controllerCountry.text = country["name"]
-                        : null;
+                    if(phone.countryCode == "+${country["dial_code"]}"){
+                      _controllerCountry.text = country["name"];
+
+                    }
+
+
                   }
                 },
               ),
@@ -234,9 +235,6 @@ String? fullPhoneNo;
       if (snap.exists) {
         UserModel   _user = UserModel.fromJson(jsonEncode(snap.data()));
 
-        List<PhoneModel>  _phone=     countries.map((map) => PhoneModel.fromMap(map)).toList();
-        PhoneModel filteredPhone= _phone.singleWhere((element) => element.name==_user.country);
-        String? newPhone=_user.phone!=null?_user.phone!.replaceAll('+${filteredPhone.dialCode}', ''):_user.phone;
         UserModel  user=UserModel(
             id:_user.id,
             isAvailableForDonation:_user.isAvailableForDonation,
@@ -247,7 +245,7 @@ String? fullPhoneNo;
             lastTimeDonated:_user.lastTimeDonated,
             rating:_user.rating,
             timestamp:_user.timestamp,
-            phone:newPhone,///Here we have assigned a new without country dial code
+            phone:_user.phone,
             price:_user.price,
             geo: _user.geo,
             group: _user.group,
@@ -266,6 +264,7 @@ String? fullPhoneNo;
         _controllerCity.text = user.city!;
         _controllerCountry.text = user.country!;
         _controllerPhone.text = user.phone!;
+        // _phoneNumberController.phoneNumber.value = user.phone!;
         _controllerEmail.text = user.email!;
         _geoController.insertGeo(GeoPoint(user.geo![0], user.geo![1]));
         _geoController.getPlace(GeoPoint(user.geo![0], user.geo![1]));
@@ -298,7 +297,7 @@ String? fullPhoneNo;
           type: _typeController.choiceData.value,
           group: _bloodController.choiceData.value,
           url: widget.currentUser!.photoUrl,
-          phone: fullPhoneNo,
+          phone: _controllerPhone.text,
           email: _controllerEmail.text);
     // App.instance
     //     .snakBar( text: "Loading....");
