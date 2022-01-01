@@ -1,3 +1,4 @@
+import 'package:bloodbank/Controllers/contants/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -87,7 +88,7 @@ Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(Bui
       child: SmartSelect<String>.single(
 placeholder: placeholder,
           title: heading,
-          value: controller!.choiceData.value,
+          value: controller?.choiceData.value??'not selected',
           choiceItems: options,
           onChange: (state) { controller.val(state.value);
 

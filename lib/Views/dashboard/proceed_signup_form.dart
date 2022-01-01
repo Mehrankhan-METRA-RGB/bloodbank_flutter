@@ -176,6 +176,11 @@ String? fullPhoneNumber;
               ),
             ),
             AppTextField(
+              controller: _controllerEmail,
+              inputType: TextInputType.emailAddress,
+              hint: "Email",
+            ),
+            AppTextField(
               controller: _controllerCountry,
               inputType: TextInputType.name,
               hint: "Country",
@@ -225,23 +230,19 @@ String? fullPhoneNumber;
 
 
    initialData(UserModel? user)  {
-     if (user!=null) {
-       _geoController.insertGeo(GeoPoint(user.geo![0], user.geo![1]));
-       _geoController.getPlace(GeoPoint(user.geo![0], user.geo![1]));
-       _bloodController.val(user.group!);
-       _typeController.val(user.type!);
-       _controllerPrice.text = user.price!;
-       _controllerBio.text = user.bio!;
-       _controllerCity.text = user.city!;
-       _controllerEmail.text = user.email!;
-       _controllerCountry.text = user.country!;
-       _controllerPhone.text = user.phone??'';
 
-     } else {
+       _geoController.insertGeo(GeoPoint(user?.geo?[0]??34.02000128291627, user?.geo?[1]??71.53685968369246));
+       _geoController.getPlace(GeoPoint(user?.geo?[0]??34.02000128291627, user?.geo?[1]??71.53685968369246));
+       _bloodController.val(user?.group);
+       _typeController.val(user?.type);
+       _controllerPrice.text = user?.price??'';
+       _controllerBio.text = user?.bio??'';
+       _controllerCity.text = user?.city??'';
+       _controllerEmail.text = user?.email??'';
+       _controllerCountry.text = user?.country??'';
+       _controllerPhone.text = user?.phone??'';
 
 
-
-     }
   }
 
   ///Upload or update users data
