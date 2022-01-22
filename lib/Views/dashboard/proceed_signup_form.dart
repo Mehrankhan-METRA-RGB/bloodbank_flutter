@@ -1,5 +1,3 @@
-
-
 import 'package:bloodbank/Controllers/coice_controller.dart';
 import 'package:bloodbank/Controllers/geo_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,8 +17,10 @@ import 'dashboard.dart';
 import 'map/map_show.dart';
 
 class ProceedSignUp extends StatefulWidget {
-  const ProceedSignUp({this.currentUser,this.oldData, Key? key}) : super(key: key);
-final UserModel? oldData;
+  const ProceedSignUp({this.currentUser, this.oldData, Key? key})
+      : super(key: key);
+  final UserModel? oldData;
+
   ///Constructor fields
   final GoogleSignInAccount? currentUser;
 
@@ -32,10 +32,11 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
   /// local variable fields
 
   final CollectionReference userReference =
-  FirebaseFirestore.instance.collection(userDoc);
-  final ChoiceBloodController _bloodController=Get.put(ChoiceBloodController());
-  final ChoiceTypeController _typeController=Get.put(ChoiceTypeController());
-  final GeoController _geoController=Get.put(GeoController());
+      FirebaseFirestore.instance.collection(firebaseCollection);
+  final ChoiceBloodController _bloodController =
+      Get.put(ChoiceBloodController());
+  final ChoiceTypeController _typeController = Get.put(ChoiceTypeController());
+  final GeoController _geoController = Get.put(GeoController());
   bool isDataNotAssignToCont = true;
   final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
   final TextEditingController _controllerBio = TextEditingController();
@@ -51,7 +52,7 @@ class _ProceedSignUpState extends State<ProceedSignUp> {
 
   Future<DocumentSnapshot<Map<String, dynamic>>>? loadedData;
   // LatLng? _geo;
-String? fullPhoneNumber;
+  String? fullPhoneNumber;
   MarkerId idPlace = const MarkerId("pickPlace");
   @override
   void initState() {
@@ -99,14 +100,13 @@ String? fullPhoneNumber;
     _controllerGeo.addListener(() {
       setState(() {});
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body:
-        SafeArea(child: SingleChildScrollView(child: formColumn(context))));
+            SafeArea(child: SingleChildScrollView(child: formColumn(context))));
   }
 
   Widget formColumn(BuildContext context) {
@@ -115,26 +115,23 @@ String? fullPhoneNumber;
         child: Column(
           children: [
             // App.instance.button(context, child: const Text('Test'), onPressed: (){initialData();}),
-           MapShow(
-                paddingTop: 20,
-                width: MediaQuery.of(context).size.width - 4,
-                height: 200,
-
-
+            MapShow(
+              paddingTop: 20,
+              width: MediaQuery.of(context).size.width - 4,
+              height: 200,
             ),
             Obx(() {
-              if(!_geoController.placeByGeo.isBlank!){
-
-                _controllerCity.text=_geoController.placeByGeo.value[2]!;
+              if (!_geoController.placeByGeo.isBlank!) {
+                _controllerCity.text = _geoController.placeByGeo.value[2]!;
               }
 
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
                     child: Text(
-                      _geoController.placeByGeo.value.toString(),
-                      style: Theme.of(context).textTheme.labelSmall,
-                    )),
+                  _geoController.placeByGeo.value.toString(),
+                  style: Theme.of(context).textTheme.labelSmall,
+                )),
               );
             }),
             AppTextField(
@@ -158,7 +155,7 @@ String? fullPhoneNumber;
                 onChanged: (phone) {
                   // _controllerPhone.text=phone.completeNumber;
                   // print(countries.contains(phone.countryCode));
-                  fullPhoneNumber=phone.completeNumber;
+                  fullPhoneNumber = phone.completeNumber;
                   for (var country in countries) {
                     phone.countryCode == "+${country["dial_code"]}"
                         ? _controllerCountry.text = country["name"]
@@ -220,28 +217,21 @@ String? fullPhoneNumber;
         ));
   }
 
-
-
-
-
-
   ///TODO: Business Logic
 
-
-   initialData(UserModel? user)  {
-
-       _geoController.insertGeo(GeoPoint(user?.geo?[0]??34.02000128291627, user?.geo?[1]??71.53685968369246));
-       _geoController.getPlace(GeoPoint(user?.geo?[0]??34.02000128291627, user?.geo?[1]??71.53685968369246));
-       _bloodController.val(user?.group);
-       _typeController.val(user?.type);
-       _controllerPrice.text = user?.price??'';
-       _controllerBio.text = user?.bio??'';
-       _controllerCity.text = user?.city??'';
-       _controllerEmail.text = user?.email??'';
-       _controllerCountry.text = user?.country??'';
-       _controllerPhone.text = user?.phone??'';
-
-
+  initialData(UserModel? user) {
+    _geoController.insertGeo(GeoPoint(user?.geo?[0] ?? 34.02000128291627,
+        user?.geo?[1] ?? 71.53685968369246));
+    _geoController.getPlace(GeoPoint(user?.geo?[0] ?? 34.02000128291627,
+        user?.geo?[1] ?? 71.53685968369246));
+    _bloodController.val(user?.group);
+    _typeController.val(user?.type);
+    _controllerPrice.text = user?.price ?? '';
+    _controllerBio.text = user?.bio ?? '';
+    _controllerCity.text = user?.city ?? '';
+    _controllerEmail.text = user?.email ?? '';
+    _controllerCountry.text = user?.country ?? '';
+    _controllerPhone.text = user?.phone ?? '';
   }
 
   ///Upload or update users data
@@ -270,6 +260,10 @@ String? fullPhoneNumber;
             _geoController.geo.value!.longitude
           ],
           bio: _controllerBio.text,
+          lastTimeDonated: widget.oldData?.lastTimeDonated,
+          totalDonations: widget.oldData?.totalDonations ?? 0,
+          // isAvailableForDonation: widget.oldData?.isAvailableForDonation??false,
+          rating: widget.oldData?.rating ?? 0,
           price: _controllerPrice.text,
           type: _typeController.choiceData.value,
           group: _bloodController.choiceData.value,
@@ -282,12 +276,24 @@ String? fullPhoneNumber;
           .whenComplete(() => addUser(context, userModel: userData))
           .whenComplete(() {
         Hive.box(authBox).put(authBoxCredentialsKey, data.toJson());
-        Hive.box(authBox).put(authBoxDataKey, userData.toJson());
+
+        Hive.box(authBox).put(
+            authBoxDataKey,
+            UserModel(
+                    id: userData.id,
+                    phone: userData.phone,
+                    url: userData.url,
+                    name: userData.name,
+                    country: userData.country,
+                    geo: userData.geo,
+                    group: userData.group)
+                .toJson());
       }).whenComplete(() => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Dashboard(user: userData,
-              ))));
+              context,
+              MaterialPageRoute(
+                  builder: (context) => Dashboard(
+                        user: userData,
+                      ))));
     } else {
       App.instance
           .snackBar(context, text: "Not Validated", bgColor: Colors.red);
@@ -303,9 +309,8 @@ String? fullPhoneNumber;
         .whenComplete(
             () => App.instance.snackBar(context, text: "Profile Updated"))
         .catchError((error) => App.instance.snackBar(context,
-        text: "Failed to add user: $error", bgColor: Colors.redAccent));
+            text: "Failed to add user: $error", bgColor: Colors.redAccent));
   }
-
 
   @override
   void dispose() {

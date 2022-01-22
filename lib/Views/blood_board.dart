@@ -26,43 +26,45 @@ height=MediaQuery.of(context).size.height;
         child: App.instance.dropDown(values: bloodGroups, titles: bloodGroups,controller: controller,
             placeholder:controller.choiceData.value,paddingVert: 2,
             heading: 'Blood Group'),),),
-        body: ListView(shrinkWrap: true,
-          children: [
-         // Card(child: App.instance.dropDown(values: bloodGroups, titles: bloodGroups,controller: controller,
-         //     placeholder:controller.choiceData.value,paddingVert: 2,
-         //     heading: 'Blood Group'),)   ,
-        Row(mainAxisAlignment: MainAxisAlignment.center,children:[
-          SizedBox(width: width!/2.2,child:const Card(color: Colors.black54,child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text('Donate To',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w700),),
-          ),),),
-          SizedBox(width: width!/2.2,child:const Card(color: Colors.black54,child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text('Receive From',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w700),),
-          ),),),
-        ]),
-            Row(mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              SizedBox(width: width!/2.2,
-                height: height!-180,
-                child: Card(
-                  child: Column(children: [
-                    for(var grp in controller.choiceDonors.value)
-                      ListTile(title: Text(grp,style:const TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.normal),),),
-                  ],),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+           // Card(child: App.instance.dropDown(values: bloodGroups, titles: bloodGroups,controller: controller,
+           //     placeholder:controller.choiceData.value,paddingVert: 2,
+           //     heading: 'Blood Group'),)   ,
+          Row(mainAxisAlignment: MainAxisAlignment.center,children:[
+            SizedBox(width: width!/2.2,child:const Card(color: Colors.black54,child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text('Donate To',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w700),),
+            ),),),
+            SizedBox(width: width!/2.2,child:const Card(color: Colors.black54,child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text('Receive From',style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w700),),
+            ),),),
+          ]),
+              Row(mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                SizedBox(width: width!/2.2,
+                  height: height!-180,
+                  child: Card(
+                    child: Column(children: [
+                      for(var grp in controller.choiceDonors.value)
+                        ListTile(title: Text(grp,style:const TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.normal),),),
+                    ],),
+                  ),
                 ),
-              ),
-              SizedBox(width: width!/2.2,
-                height: height!-180,
-                child:Card(child: Column(children: [
-                  for(var grp in controller.choiceReceivers.value)
-                    ListTile(title: Text(grp,style:const TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.normal),),),
-                ],)),
-              )
+                SizedBox(width: width!/2.2,
+                  height: height!-180,
+                  child:Card(child: Column(children: [
+                    for(var grp in controller.choiceReceivers.value)
+                      ListTile(title: Text(grp,style:const TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.normal),),),
+                  ],)),
+                )
+
+              ],),
 
             ],),
-
-          ],),
+        ),
       );
 
 

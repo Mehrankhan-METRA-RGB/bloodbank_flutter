@@ -9,7 +9,7 @@ import 'package:sliverbar_with_card/sliverbar_with_card.dart';
 import '../Controllers/coice_controller.dart';
 import '../Controllers/contants/values.dart';
 import '../Views/constants/widgets.dart';
-import '../Views/dashboard/drawer.dart';
+import '../Views/dashboard/profile.dart';
 import '../Views/dashboard/map/map_show.dart';
 import '../models/user_model.dart';
 class Test2 extends StatelessWidget {
@@ -22,7 +22,7 @@ class Test2 extends StatelessWidget {
    final ChoiceBloodController bloodController =Get.put(ChoiceBloodController());
    final googleSign = GoogleSignIn();
    final CollectionReference userReference =
-   FirebaseFirestore.instance.collection(userDoc);
+   FirebaseFirestore.instance.collection(firebaseCollection);
    List? myGeo = [];
   final GlobalKey? _key = GlobalKey();
   @override
@@ -30,7 +30,7 @@ class Test2 extends StatelessWidget {
 
 
     return Scaffold(
-      drawer: const DashboardDrawer(),
+      drawer: const UserProfile(),
       body:
         Center(
           child: GetX<GeoController>(

@@ -13,14 +13,14 @@ import 'dashboard/proceed_signup_form.dart';
 class Login extends StatelessWidget {
   Login({Key? key}) : super(key: key);
   final AuthController signCont = Get.put(AuthController());
- final CollectionReference userRef = FirebaseFirestore.instance.collection(userDoc);
+ final CollectionReference userRef = FirebaseFirestore.instance.collection(firebaseCollection);
   final signGoogle = GoogleSignIn();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.red,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.red,
+      // ),
       body: Obx(() {
         if (signCont.googleAccount.value == null) {
           return Center(
@@ -55,15 +55,15 @@ class Login extends StatelessWidget {
     signCont.login().whenComplete(() async {
       UserModel? user;
       await FirebaseFirestore.instance
-          .collection(userDoc)
+          .collection(firebaseCollection)
           .doc(signCont.googleAccount.value!.id)
           .get()
-          .then((DocumentSnapshot snap) {
+          .then((DocumentSnapshot<Map<String,dynamic>> snap) {
         if (snap.exists) {
           /// Here we break the [UserModel] and created a new [UserModel]
           /// with a phone number having no [dial_code]
-
-          UserModel _user = UserModel.fromJson(jsonEncode(snap.data()));
+print(snap.data());
+          UserModel _user = UserModel.fromMap(snap.data()!);
 
           List<PhoneModel> _phone =
               countries.map((map) => PhoneModel.fromMap(map)).toList();
@@ -78,11 +78,12 @@ class Login extends StatelessWidget {
               totalDonations: _user.totalDonations,
               name: _user.name,
               email: _user.email,
-              nextDonation: _user.nextDonation,
-              lastTimeDonated: _user.lastTimeDonated,
+              nextDonation: _user.nextDonation??Timestamp(000, 000),
+              lastTimeDonated: _user.lastTimeDonated??Timestamp(000, 000),
               rating: _user.rating,
-              timestamp: _user.timestamp,
-              phone: newPhone,  ///Here we have assigned a new number without country dial code
+              timestamp: _user.timestamp??Timestamp(000, 000),
+              ///Here we have assigned a new number without country dial code
+              phone: newPhone,
               price: _user.price,
               geo: _user.geo,
               group: _user.group,
@@ -91,6 +92,7 @@ class Login extends StatelessWidget {
               city: _user.city,
               url: _user.url,
               type: _user.type);
+          print(_user.lastTimeDonated);
         } else {
           user = null;
         }

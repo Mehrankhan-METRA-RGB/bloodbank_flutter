@@ -32,7 +32,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   /// local variable fields
 final PhoneNumberController _phoneNumberController=Get.put(PhoneNumberController());
   final CollectionReference userReference =
-      FirebaseFirestore.instance.collection(userDoc);
+      FirebaseFirestore.instance.collection(firebaseCollection);
   final ChoiceBloodController _bloodController=Get.put(ChoiceBloodController());
   final ChoiceTypeController _typeController=Get.put(ChoiceTypeController());
   final GeoController _geoController=Get.put(GeoController());
@@ -51,9 +51,9 @@ final PhoneNumberController _phoneNumberController=Get.put(PhoneNumberController
 
   Future<DocumentSnapshot<Map<String, dynamic>>>? loadedData;
   // LatLng? _geo;
+UserModel?   _userOldData;
 
-
-  @override
+@override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -228,32 +228,32 @@ String? fullPhoneNo;
   ///
   Future initialData(String? userDocumentId) async {
     await FirebaseFirestore.instance
-        .collection(userDoc)
+        .collection(firebaseCollection)
         .doc(userDocumentId!)
         .get()
-        .then((DocumentSnapshot snap) {
+        .then((DocumentSnapshot<Map<String,dynamic>> snap) {
       if (snap.exists) {
-        UserModel   _user = UserModel.fromJson(jsonEncode(snap.data()));
+      _userOldData = UserModel.fromMap(snap.data()!);
 
         UserModel  user=UserModel(
-            id:_user.id,
-            isAvailableForDonation:_user.isAvailableForDonation,
-            totalDonations:_user.totalDonations,
-            name:_user.name,
-            email:_user.email,
-            nextDonation:_user.nextDonation,
-            lastTimeDonated:_user.lastTimeDonated,
-            rating:_user.rating,
-            timestamp:_user.timestamp,
-            phone:_user.phone,
-            price:_user.price,
-            geo: _user.geo,
-            group: _user.group,
-            bio: _user.bio,
-            country: _user.country,
-            city: _user.city,
-            url: _user.url,
-            type: _user.type
+            id:_userOldData?.id,
+            isAvailableForDonation:_userOldData?.isAvailableForDonation,
+            totalDonations:_userOldData?.totalDonations,
+            name:_userOldData?.name,
+            email:_userOldData?.email,
+            nextDonation:_userOldData?.nextDonation,
+            lastTimeDonated:_userOldData?.lastTimeDonated,
+            rating:_userOldData?.rating,
+            timestamp:_userOldData?.timestamp,
+            phone:_userOldData?.phone,
+            price:_userOldData?.price,
+            geo: _userOldData?.geo,
+            group: _userOldData?.group,
+            bio: _userOldData?.bio,
+            country: _userOldData?.country,
+            city: _userOldData?.city,
+            url: _userOldData?.url,
+            type: _userOldData?.type
 
 
         );
@@ -292,6 +292,8 @@ String? fullPhoneNo;
             _geoController.geo.value!.latitude,
             _geoController.geo.value!.longitude
           ],
+          lastTimeDonated: _userOldData?.lastTimeDonated,
+          totalDonations:_userOldData?.totalDonations ,
           bio: _controllerBio.text,
           price: _controllerPrice.text,
           type: _typeController.choiceData.value,
@@ -304,12 +306,21 @@ String? fullPhoneNo;
       await addUser(context, userModel: userData)
           .whenComplete(() {
         Hive.box(authBox).put(authBoxCredentialsKey, data.toJson());
-        Hive.box(authBox).put(authBoxDataKey, userData.toJson());
-      })
+        Hive.box(authBox).put(
+            authBoxDataKey,
+            UserModel(
+                id: userData.id,
+                phone: userData.phone,
+                url: userData.url,
+                name: userData.name,
+                country: userData.country,
+                geo: userData.geo,
+                group: userData.group)
+                .toJson());      })
           .whenComplete(() => Navigator.pop(context));
     } else {
       App.instance
-          .snakBar( text:"Not Validated",bgColor:Colors.red );
+          .snackBar(context, text:"Not Validated",bgColor:Colors.red );
 
     }
   }
@@ -319,14 +330,16 @@ String? fullPhoneNo;
   Future<void> addUser(BuildContext context, {UserModel? userModel}) {
     return userReference
         .doc(userModel!.id)
-        .set(userModel.toMap())
+        .update(userModel.toMap())
         .whenComplete(
-            () => App.instance.snackBar(context, text: "Profile Updated"))
+            () => App.instance.snackBar(context, text: "Profile Updated",bgColor: Colors.deepPurple),)
         .catchError((error) {
-        //   App.instance.snackBar(context,
-        // text: "Failed to add user: $error", bgColor: Colors.redAccent);
+          App.instance.snackBar(context,
+        text: "Failed to add user: $error", bgColor: Colors.redAccent);
 
-        print("Failed to add user: $error");
+        if (kDebugMode) {
+          print("Failed to add user: $error");
+        }
         });
   }
 

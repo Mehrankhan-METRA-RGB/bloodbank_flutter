@@ -1,20 +1,25 @@
 
 import 'dart:io';
+import 'package:bloodbank/Controllers/auth/auth_controller.dart';
 import 'package:bloodbank/models/credentials_model.dart';
 import 'package:bloodbank/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as pathF;
 import 'Controllers/contants/values.dart';
+import 'Test/test_1.dart';
 import 'Views/dashboard/dashboard.dart';
 import 'Views/login_page.dart';
 
 // final AuthController authController=Get.put(AuthController());
 final GoogleSignIn signGoogle = GoogleSignIn();
 bool shouldUseFirestoreEmulator = false;
+final AuthController googleController = Get.put(AuthController());
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,13 +28,24 @@ Future<void> main() async {
   ///Hive initiated
   Hive.init(directory.path);
   await Hive.openBox(authBox);
+  await Hive.openBox(yourDonorsBox);
 
   ///Firebase Initializations for application
   await Firebase.initializeApp();
-  // signGoogle.signOut();
-  // Hive.box(authBox).delete(authBoxCredentialsKey);
-  // Hive.box(authBox).containsKey(authBoxDataKey)?
-  // Hive.box(authBox).delete(authBoxDataKey):null;
+
+
+
+  // googleController.logout();
+  //     Hive.box(authBox).delete(authBoxCredentialsKey);
+  //     Hive.boxExists(yourDonorsBox).then((exist) => exist
+  //         ? Hive.box(yourDonorsBox).deleteAll(Hive.box(yourDonorsBox).keys)
+  //         : null);
+  //     Hive.box(authBox).containsKey(authBoxDataKey)
+  //         ? Hive.box(authBox).delete(authBoxDataKey)
+  // : null;
+
+
+
   if (shouldUseFirestoreEmulator) {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }

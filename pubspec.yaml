@@ -52,7 +52,7 @@ dependencies:
   http: ^0.12.2
   sliverbar_with_card: ^0.1.5
   url_launcher:
-
+  flutter_sms: ^2.3.2
 
 dev_dependencies:
   flutter_test:

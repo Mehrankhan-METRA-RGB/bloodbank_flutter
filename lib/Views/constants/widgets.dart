@@ -11,68 +11,78 @@ class App {
   static final instance = App._private();
 
   ///Application SnackBar
-Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(BuildContext context,
-          {String? text, Color? bgColor, TextStyle? textStyle}) async {
-    return Scaffold.of(context).showSnackBar( SnackBar(
-        content: Text(
-            text!,
-            style: textStyle ?? Theme.of(context).snackBarTheme.contentTextStyle,
-        ),
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-        duration: const Duration(seconds: 2),
+  Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> snackBar(
+      BuildContext context,
+      {String? text,
+      Color? bgColor,
+      TextStyle? textStyle}) async {
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+        text!,
+        style: textStyle ?? Theme.of(context).snackBarTheme.contentTextStyle,
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+      duration: const Duration(seconds: 2),
+      backgroundColor:
+      bgColor ?? Theme.of(context).snackBarTheme.backgroundColor,
+      behavior: SnackBarBehavior.floating,
+      shape: Theme.of(context).snackBarTheme.shape,
+    ));
 
-        backgroundColor:
-            bgColor ?? Theme.of(context).snackBarTheme.backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: Theme.of(context).snackBarTheme.shape,
-      ));
+      // Scaffold.of(context).showSnackBar();
   }
 
-  snakBar({required String? text,String? title, Color? bgColor, TextStyle? textStyle}){
-   Get.snackbar(
-    title??"Application",
-    text!,
-    icon: const Icon(Icons.person, color: Colors.white),
-    snackPosition: SnackPosition.BOTTOM,
-    margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-    duration: const Duration(seconds: 2),
-    isDismissible: true,
-    // dismissDirection: SnackDismissDirection.HORIZONTAL,
-    forwardAnimationCurve: Curves.easeOutBack,
-    backgroundColor:
-    bgColor ?? Get.theme.snackBarTheme.backgroundColor,
-    // snackStyle: sna,
+  // snakBar(
+  //     {required String? text,
+  //     String? title,
+  //     Color? bgColor,
+  //     TextStyle? textStyle}) {
+  //   Get.snackbar(
+  //     title ?? "Application",
+  //     text!,
+  //     icon: const Icon(Icons.person, color: Colors.white),
+  //     snackPosition: SnackPosition.BOTTOM,
+  //     margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+  //     duration: const Duration(seconds: 2),
+  //     isDismissible: true,
+  //     // dismissDirection: SnackDismissDirection.HORIZONTAL,
+  //     forwardAnimationCurve: Curves.easeOutBack,
+  //     backgroundColor: bgColor ?? Get.theme.snackBarTheme.backgroundColor,
+  //     // snackStyle: sna,
+  //
+  //     // shape: Get.theme.snackBarTheme.shape,
+  //   );
+  // }
 
-    // shape: Get.theme.snackBarTheme.shape,
-
-  );
-  }
-
-
-///Application Button
-   button(BuildContext context,{
+  ///Application Button
+  button(
+    BuildContext context, {
     required Widget child,
     required void Function()? onPressed,
     Color? color,
-  })=>  Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 1),
-    child: CupertinoButton(child: Row(mainAxisAlignment: MainAxisAlignment.center,
-
-      children: [
-        child,
-      ],
-    ),padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10), onPressed: onPressed,color: color??Colors.redAccent,),
-  );
-
+  }) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 1),
+        child: CupertinoButton(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              child,
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          onPressed: onPressed,
+          color: color ?? Colors.redAccent,
+        ),
+      );
 
   dropDown(
       {required List<String>? values,
-        required List<String>? titles,
-        String heading = "title",
-       String  placeholder='select',
-        double? paddingVert=25,
-
-        dynamic controller}) {
+      required List<String>? titles,
+      String heading = "title",
+      String placeholder = 'select',
+      double? paddingVert = 25,
+      dynamic controller}) {
     // simple usage
     if (values!.length != titles!.length) {
       throw "The length of values and titles must be same";
@@ -84,18 +94,17 @@ Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>   snackBar(Bui
     ];
 
     return Padding(
-      padding:  EdgeInsets.symmetric(vertical: paddingVert!),
+      padding: EdgeInsets.symmetric(vertical: paddingVert!),
       child: SmartSelect<String>.single(
-placeholder: placeholder,
+          placeholder: placeholder,
           title: heading,
-          value: controller?.choiceData.value??'not selected',
+          value: controller?.choiceData.value ?? 'not selected',
           choiceItems: options,
-          onChange: (state) { controller.val(state.value);
-
+          onChange: (state) {
+            controller.val(state.value);
           },
           modalValidation: (val) {
             if (val.isEmpty) {
-
               return "Please $heading";
             } else {
               return null;
@@ -104,4 +113,38 @@ placeholder: placeholder,
     );
   }
 
+  Future dialog(BuildContext context,
+      {String title = 'Dialog',
+      required Widget content,
+      Color? bgColor,
+      EdgeInsetsGeometry? contentPadding,
+      required Function() onDonePressed,
+      String proceedButtonName = 'Ok'}) async {
+    return showDialog(
+      context: context,
+      barrierDismissible:
+          false, // dialog is dismissible with a tap on the barrier
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: bgColor ?? Colors.white,
+          contentPadding: contentPadding ??
+              const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          title: Text(title),
+          content: content,
+          actions: [
+            MaterialButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            MaterialButton(
+              child: Text(proceedButtonName),
+              onPressed: onDonePressed,
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
